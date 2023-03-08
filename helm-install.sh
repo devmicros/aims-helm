@@ -132,10 +132,11 @@ if [ ! -z "${project}" ]; then
       
       echo -e "\nStatus of project ${project}:\n"
       helm list
-      echo -e "\nAIMS URL:\n"
+      echo -e "\nAIMS URL:"
       oc get routes | grep 'aims-http'
-      echo -e "\nSERVICE IP:PORT FOR DEVICES:\n"
+      echo -e "\nSERVICE IP:PORT FOR DEVICES:"
       oc get svc | grep 'comm-ws'
+      echo -e "\n"
     else
   	  echo "Not found pods:\n"
   	  oc get pods
