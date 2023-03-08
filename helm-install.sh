@@ -134,7 +134,7 @@ if [ ! -z "${project}" ]; then
       helm list
       echo -e "\nAIMS URL:\n"
       oc get routes | grep 'aims-http'
-      echo -e "\nIP AND PORT OF RANDOM LOCK:\n"
+      echo -e "\nSERVICE IP:PORT FOR DEVICES:\n"
       oc get svc | grep 'comm-ws'
     else
   	  echo "Not found pods:\n"
