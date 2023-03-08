@@ -138,7 +138,7 @@ if [ ! -z "${project}" ]; then
       oc get svc | grep 'comm-ws'
       echo -e "\n"
     else
-  	  echo "Not found pods:\n"
+  	  echo "Pods not found:\n"
   	  oc get pods
   	fi
   else
