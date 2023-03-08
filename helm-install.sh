@@ -58,6 +58,7 @@ if [ ! -z "${project}" ]; then
   
     oc adm policy add-scc-to-user privileged -z default -n ${project}
     
+    
     cd aims-chart
     cp -f values-yaml values.yaml
     
@@ -74,6 +75,7 @@ if [ ! -z "${project}" ]; then
     
     sed -i ${sg} values.yaml	   
 
+    echo -e "\n"
     cd ..
     helm install aims2 aims-chart
     
@@ -126,10 +128,14 @@ if [ ! -z "${project}" ]; then
       searchpod='aims\-ws\-' 
       pod_status
     
-      echo -e "\nStatus of project ${project}:\n"
-      oc get routes  
-      helm list
       rm aims2*.yaml
+      
+      echo -e "\nStatus of project ${project}:\n"
+      helm list
+      echo -e "\nAIMS URL:\n"
+      oc get routes | grep 'aims-http'
+      echo -e "\nIP AND PORT OF RANDOM LOCK:\n"
+      oc get svc | grep 'comm-ws'
     else
   	  echo "Not found pods:\n"
   	  oc get pods
