@@ -1,0 +1,524 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+    generation: 5
+    name: aims-db
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: aims-db
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: aims-db
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_DATABASE
+            value: aims
+          - name: POSTGRESQL_PASSWORD
+            value: microsafe.2022
+          - name: POSTGRESQL_EXTRA_FLAGS
+            value: --max_connections=600 --shared_buffers=80MB
+          image: hdongx/aims-db@sha256:d1009cd612d38b7ad3820f390f533eb641744244122683f1802a82ce1e215a55
+          imagePullPolicy: IfNotPresent
+          name: aims-db
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /docker-entrypoint-preinitdb.d
+            name: aims-db-3
+          - mountPath: /docker-entrypoint-initdb.d
+            name: aims-db-2
+          - mountPath: /bitnami/postgresql
+            name: aims-db-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+        volumes:
+        - emptyDir: {}
+          name: aims-db-3
+        - name: aims-db-2
+          persistentVolumeClaim:
+            claimName: aims-init-storage
+        - name: aims-db-1
+          persistentVolumeClaim:
+            claimName: aims-db-storage
+        - emptyDir: {}
+          name: default-token-l4tgm
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "4"
+    generation: 4
+    name: aims-gql
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: aims-gql
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: aims-gql
+      spec:
+        containers:
+        - env:
+          - name: DATABASE_URL
+            value: postgres://postgres:microsafe.2022@aims-db/aims
+          image: hdongx/aims-gql@sha256:a5abf892caa165ec2a309d050490012682bdffed93ed00fba6412431ad0ab726
+          imagePullPolicy: IfNotPresent
+          name: aims-gql
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 5000
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "9"
+    generation: 11
+    name: aims-http
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: aims-http
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: aims-http
+      spec:
+        containers:
+        - env:
+          - name: ENV_GPHQL_HTTP
+            value: http
+          - name: ENV_GPHQL_HOST
+            value: aims-gql.microsafe.com.mx
+          - name: ENV_GPHQL_PORT
+          - name: ENV_APPWS_HTTP
+            value: http
+          - name: ENV_APPWS_HOST
+            value: aims-ws.microsafe.com.mx
+          - name: ENV_APPWS_PORT
+          - name: ENV_APP_VERSION
+            value: "8081"
+          image: hdongx/aims-html@sha256:dc6c8850922e211e007860c0e68d3fabd804fee6496f4085192a29f4048c7fcd
+          imagePullPolicy: IfNotPresent
+          name: aims-http
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "4"
+    generation: 4
+    name: aims-ws
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: aims-ws
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: aims-ws
+      spec:
+        containers:
+        - env:
+          - name: APPWS_PORT
+            value: "8081"
+          - name: GRAPHQL_HTTP
+            value: http
+          - name: GRAPHQL_HOST
+            value: aims-gql
+          - name: GRAPHQL_PORT
+            value: "5000"
+          - name: POSTGRESQL_HOST
+            value: aims-db
+          - name: POSTGRESQL_PORT
+            value: "5432"
+          - name: POSTGRESQL_DATABASE
+            value: aims
+          - name: POSTGRESQL_USER
+            value: postgres
+          - name: POSTGRESQL_PASSWORD
+            value: microsafe.2022
+          - name: SS_KEY
+            value: Microsafe01
+          - name: SS_IV
+            value: Microsafe02
+          - name: APPWEB_HTTP
+            value: http
+          - name: APPWEB_HOST
+            value: aims-http.microsafe.com.mx
+          - name: APPWEB_PORT
+          image: hdongx/aims-ws@sha256:9fd288468a1a63411900eaeb775126fe0d6025f54e41e7df298c1c0daaab9b7c
+          imagePullPolicy: IfNotPresent
+          name: aims-ws
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 8081
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+    generation: 1
+    name: comm-db
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: comm-db
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: comm-db
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_DATABASE
+            value: aimsdata
+          - name: POSTGRESQL_PASSWORD
+            value: microsafe.2022
+          - name: POSTGRESQL_EXTRA_FLAGS
+            value: --max_connections=600 --shared_buffers=80MB
+          image: hdongx/comm-db@sha256:72e7cf5d4f541cf8167bc55c09d51b8ae9d7e61b8ebec844eca7ab61078f417e
+          imagePullPolicy: IfNotPresent
+          name: comm-db
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /docker-entrypoint-preinitdb.d
+            name: comm-db-3
+          - mountPath: /docker-entrypoint-initdb.d
+            name: comm-db-2
+          - mountPath: /bitnami/postgresql
+            name: comm-db-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+        volumes:
+        - emptyDir: {}
+          name: comm-db-3
+        - name: comm-db-2
+          persistentVolumeClaim:
+            claimName: comm-init-storage
+        - name: comm-db-1
+          persistentVolumeClaim:
+            claimName: comm-db-storage
+        - emptyDir: {}
+          name: default-token-l4tgm
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "3"
+    generation: 3
+    name: comm-gql
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: comm-gql
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: comm-gql
+      spec:
+        containers:
+        - env:
+          - name: DATABASE_URL
+            value: postgres://postgres:microsafe.2022@comm-db:5432/aimsdata
+          image: hdongx/comm-gql@sha256:409bbc32d3a577f3689f450fbdedcfdd3a084591bfa5091052390da4c44f1907
+          imagePullPolicy: IfNotPresent
+          name: comm-gql
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 5000
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "3"
+    generation: 3
+    name: comm-ws
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: comm-ws
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: comm-ws
+      spec:
+        containers:
+        - env:
+          - name: COMMWS_PORT
+            value: "9000"
+          - name: GRAPHQL_URL
+            value: http://comm-gql:5000
+          - name: POSTGRESQL_HOST
+            value: comm-db
+          - name: POSTGRESQL_PORT
+            value: "5432"
+          - name: POSTGRESQL_DATABASE
+            value: aimsdata
+          - name: POSTGRESQL_USER
+            value: postgres
+          - name: POSTGRESQL_PASSWORD
+            value: microsafe.2022
+          image: hdongx/comm-ws@sha256:09fb32f877bf20ace031321eeacb507c857551184351220a22671e56d32a4e46
+          imagePullPolicy: IfNotPresent
+          name: comm-ws
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 9000
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "3"
+    generation: 3
+    name: data-ws
+    namespace:  {{ .Values.namespace }}
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: data-ws
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: data-ws
+      spec:
+        containers:
+        - env:
+          - name: DATAWS_TIMER
+            value: "10"
+          - name: GRAPHQL_URL
+            value: http://comm-gql:5000
+          - name: POSTGRESQL_HOST
+            value: comm-db
+          - name: POSTGRESQL_PORT
+            value: "5432"
+          - name: POSTGRESQL_DATABASE
+            value: aimsdata
+          - name: POSTGRESQL_USER
+            value: postgres
+          - name: POSTGRESQL_PASSWORD
+            value: microsafe.2022
+          image: hdongx/data-ws@sha256:5c0f79d9a3b8b9e66b642d6eeafa32910f7ff5b26a3787c207feca4fa7921ef1
+          imagePullPolicy: IfNotPresent
+          name: data-ws
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+          - containerPort: 9001
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        securityContext: {}
+kind: List
+metadata:
+  resourceVersion: ""

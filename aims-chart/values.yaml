@@ -1,0 +1,3 @@
+replicaCount: 1
+namespace: aims-microsafe
+supplementalGroups: 1001180000
