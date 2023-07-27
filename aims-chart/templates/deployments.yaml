@@ -402,7 +402,7 @@ items:
             value: postgres://postgres:microsafe.2022@aims-db/aims
           - name: POSTGRESQL_TRN_URL
             value: postgres://postgres:microsafe.2022@comm-db/aimsdata
-          image: devmicrosafe/data-svc@sha256:8eb722c04209e966fc36aebaadbc105601d84003c27ddcd09efc4e4df37a77f6
+          image: devmicrosafe/data-svc@sha256:a7bb5b0b1df2a351e214c270b4c51bf49da5bb661c0929bbd784f2fc8c524cb3
           imagePullPolicy: IfNotPresent
           name: data-svc
           securityContext:
