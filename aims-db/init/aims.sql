@@ -863,8 +863,8 @@ ON CONFLICT DO NOTHING;
 -- Alarms with system notification
 INSERT INTO alarm_type (id_alarm_type,name,is_notification,notification_message,id_notification_level)
 VALUES
-  (1,'Alerta',true,'El cajero %s ha tenido un error desconocido.',2),
-  (5,'Chapa Fascia Averiada',true,'Se ha averiado la Fascia del cajero %s.',2),
+  (1,'Alerta',true,'El cajero %s presenta una alarma crítica.',2),
+  (5,'Chapa Fascia Averiada',true,'Se ha averiado la fascia del cajero %s.',2),
   (6,'Sensor de Luz Averiada',true,'Se ha averiado el sensor de luz del cajero %s.',2),
   (7,'Dispensador Deshabilitado',true,'El dispensador del cajero %s está deshabilitado.',2),
   (8,'Armado',true,'Se ha armado el cajero %s cuando tenía su dispensador deshabilitado.',2)
@@ -900,9 +900,6 @@ VALUES
   (40,'Bootloader activado por comando'),
   (41,'Cambio de llave por comando'),
   (42,'X'),
-  (46,'Apertura mediante comando (Copete)'),
-  (47,'Apertura mediante reto (Copete)'),
-  (48,'Chapa abierta (Copete)'),
   (49,'Chapa cerrada (Copete)')
 ON CONFLICT DO NOTHING;
 
@@ -922,10 +919,13 @@ VALUES
   (31,'Presencia de luz',true,'Se ha encontrado la presencia de luz en el cajero %s.',2),
   (36,'Fallo la conexión',true,'La conexión del cajero %s ha sufrido un fallo.',2),
   (37,'Boton presionado',true,'Se ha presionado un botón en el cajero %s.',2),
-  (39,'Apertura (Fascia) por comando',true,'Se ha abierto correctamente la fascia del cajero %s por medio de comando remoto.',1),
+  (39,'Apertura mediante comando (Fascia)',true,'Se ha abierto correctamente la fascia del cajero %s por medio de comando remoto.',1),
   (43,'Corte de Energia por comando',true,'Se ha cortado la energía del cajero %s por medio de comando remoto.',1),
   (44,'Reenergizado por comando',true,'Se ha reenergizado el cajero %s por medio de comando remoto.',1),
   (45,'Reenergizado mediante reto',true,'Se ha reenergizado el cajero %s por medio de reto.',1),
+  (46,'Apertura mediante comando (Copete)',true,'Se ha abierto correctamente el copete del cajero %s por medio de comando remoto.',1),
+  (47,'Apertura mediante reto (Copete)',true,'El proceso de apertura randómica del cajero %s fue exitoso.',1),
+  (48,'Chapa abierta (Copete)',true,'Se ha abierto el cajero %s desde el Copete.',1),
   (50,'Apertura mediante Codigo Temporal (Fascia)',true,'El proceso de apertura (Fascia) mediante código temporal del cajero %s fue exitoso.',1),
   (51,'Apertura mediante Codigo Temporal (Copete)',true,'El proceso de apertura (Copete) mediante código temporal del cajero %s fue exitoso.',1),
   (52,'Apertura mediante Codigo Temporal (Ambas Zonas)',true,'El proceso de apertura (Ambas Zonas) mediante código temporal del cajero %s fue exitoso.',1),
