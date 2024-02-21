@@ -9,7 +9,8 @@ ALTER DATABASE aims SET glob_variables.id_work_mode_installation = 3;
 ALTER DATABASE aims SET glob_variables.id_work_mode_replacement = 4;
 ALTER DATABASE aims SET glob_variables.id_work_mode_productive = 5;
 ALTER DATABASE aims SET glob_variables.id_work_mode_discharged = 6;
-ALTER DATABASE aims SET glob_variables.valid_active_minutes_of_session = 10;SET SESSION glob_variables.encrypted_user_password = 'qOwFncF79ArlAaWpAKearQ==';
+ALTER DATABASE aims SET glob_variables.valid_active_minutes_of_session = 10;
+SET SESSION glob_variables.encrypted_user_password = 'qOwFncF79ArlAaWpAKearQ==';
 SET SESSION glob_variables.encrypted_super_user_password = 'qOwFncF79ArlAaWpAKearQ==';
 SET SESSION TIMEZONE TO 'UTC';-- DB setup
 DROP ROLE IF EXISTS system_admin;
@@ -911,7 +912,7 @@ VALUES
   (6,'Tiempo abierto agotado, sistema alarmado',true,'El tiempo abierto del cajero %s se agotó.',2),
   (12,'Limite de intentos, fuera de servicio',true,'Límite de intentos de apertura alcanzado. El cajero %s queda fuera de servicio.',2),
   (15,'Intrusion',true,'El cajero %s se encuentra en estado de intrusión.',2),
-  (16,'Chapa desconectada (Fascia)',true,'El cajero %s se encuentra desconectada.',2),
+  (16,'Chapa desconectada (Fascia)',true,'En el cajero %s, la chapa de Fascia se encuentra desconectada.',2),
   (17,'Sensor de luz desconectado',true,'Se desconectó el sensor de luz del cajero %s.',2),
   (25,'Sistema restablecido',true,'El sistema del cajero %s ha sido reestablecido.',1),
   (26,'Sistema re-energizado',true,'El sistema del cajero %s ha sido re-energizado.',1),
@@ -930,7 +931,8 @@ VALUES
   (51,'Apertura mediante Codigo Temporal (Copete)',true,'El proceso de apertura (Copete) mediante código temporal del cajero %s fue exitoso.',1),
   (52,'Apertura mediante Codigo Temporal (Ambas Zonas)',true,'El proceso de apertura (Ambas Zonas) mediante código temporal del cajero %s fue exitoso.',1),
   (53,'Apertura mediante comando (Ambas Zonas)',true,'El proceso de apertura (Ambas Zonas) mediante comando del cajero %s fue exitoso.',1),
-  (54,'Apertura mediante reto (Ambas Zonas)',true,'El proceso de apertura (Ambas Zonas) mediante reto del cajero %s fue exitoso.',1)
+  (54,'Apertura mediante reto (Ambas Zonas)',true,'El proceso de apertura (Ambas Zonas) mediante reto del cajero %s fue exitoso.',1),
+  (55,'Chapa desconectada (Copete)',true,'En el cajero %s, la chapa de Copete se encuentra desconectada.',2)
 ON CONFLICT DO NOTHING;
 
 -- Events with system notification and email notification
@@ -964,15 +966,15 @@ ON CONFLICT DO NOTHING;
 INSERT INTO command_type (id_command_type,description,input_type,with_lock_select)
   VALUES 
     (1,'Apertura','datetime',true),
-    (2,'Cargar Firmware','datetime',false),
-    (3,'Actualizar Llaves','datetime',false),
-    (4,'Reset','datetime',false),
-    (5,'Corte de Energia','datetime',false),
     (7,'Código Programado','minutes',true)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO command_type (id_command_type,description,input_type,with_lock_select,for_production)
   VALUES 
+    (2,'Cargar Firmware','datetime',false,false),
+    (3,'Actualizar Llaves','datetime',false,false),
+    (4,'Reset','datetime',false,false),
+    (5,'Corte de Energia','datetime',false,false),
     (8,'Prueba de teclado','minutes',false,false)
 ON CONFLICT DO NOTHING;
 
@@ -1010,7 +1012,7 @@ VALUES
     'superuser',
     'superuser',
     '11111',
-    'super@user.com',
+    'super@banorte.com',
     1,
     true,
     true
@@ -1028,17 +1030,17 @@ VALUES
     'XDirección',
     'XDirección',
     '11111',
-    'admin@admin.com',
+    'admin@banorte.com',
     1,
     true,
     false
   ), --PASSWORD "1234"
   (
     2,
-    'MESA_CONTROL',
-    'MESA_CONTROL',
-    'MESA_CONTROL',
-    'MESA_CONTROL',
+    'ADMIN',
+    'ADMIN',
+    'ADMIN',
+    'ADMIN',
     'XDirección',
     '1234',
     'XDirección',
@@ -1046,17 +1048,17 @@ VALUES
     'XDirección',
     'XDirección',
     '11111',
-    'mesa@control.com',
-    2,
+    'admin01@banorte.com',
+    1,
     true,
     false
   ), --PASSWORD "1234"
   (
     3,
-    'Fabian',
-    'Ley',
-    'va',
-    'Fabian',
+    'ADMIN',
+    'ADMIN',
+    'ADMIN',
+    'ADMIN',
     'XDirección',
     '1234',
     'XDirección',
@@ -1064,49 +1066,31 @@ VALUES
     'XDirección',
     'XDirección',
     '11111',
-    'fabian.boss.felt@gmail.com',
-    2,
+    'admin02@banorte.com',
+    1,
     true,
     false
   ), --PASSWORD "1234"
   (
     4,
-    'Luisana',
-    'Martin',
-    'Rod',
-    'Luisana',
-    'Cañaberal',
-    '320',
-    'Centro',
-    'Xochi',
-    'Ciudad de México',
-    'Ciudad de México',
-    '98754',
-    'lmartin@sisu.mx',
-    1,
+    'MESA_CONTROL',
+    'MESA_CONTROL',
+    'MESA_CONTROL',
+    'MESA_CONTROL',
+    'XDirección',
+    '1234',
+    'XDirección',
+    'XDirección',
+    'XDirección',
+    'XDirección',
+    '11111',
+    'mesacontrol@banorte.com',
+    2,
     true,
     false
   ), --PASSWORD "1234"
   (
     5,
-    'Enrique',
-    'Mendoza',
-    'López',
-    'Kike',
-    'Saturno',
-    '320',
-    'Centro',
-    'Fresnillo',
-    'Zacatecas',
-    'Zacatecas',
-    '93000',
-    'emendoza@sisu.mx',
-    1,  
-    true,
-    false
-  ),
-  (
-    6,
     'Monitoreo',
     'Monitoreo',
     'Monitoreo',
@@ -1118,13 +1102,13 @@ VALUES
     'Zacatecas',
     'Zacatecas',
     '93000',
-    'monitoreo@monitoreo.com',
+    'monitoreo@banorte.com',
     3,
     true,
     false
   ), --PASSWORD "1234"
   (
-    7,
+    6,
     'Asignador',
     'Asignador',
     'Asignador',
@@ -1136,13 +1120,13 @@ VALUES
     'Zacatecas',
     'Zacatecas',
     '93000',
-    'asignador@asignador.com',
+    'asignador@banorte.com',
     4,
     true,
     false
   ), --PASSWORD "1234"
   (
-    8,
+    7,
     'Test',
     'Test',
     'Test',
@@ -1154,7 +1138,7 @@ VALUES
     'Zacatecas',
     'Zacatecas',
     '93000',
-    'test@test.com',
+    'test@banorte.com',
     5,
     true,
     false
@@ -1179,11 +1163,9 @@ VALUES
   ((SELECT historical_id FROM system_user WHERE id_system_user = 1),3),
   ((SELECT historical_id FROM system_user WHERE id_system_user = 2),1),
   ((SELECT historical_id FROM system_user WHERE id_system_user = 2),2),
-  ((SELECT historical_id FROM system_user WHERE id_system_user = 5),1),
-  ((SELECT historical_id FROM system_user WHERE id_system_user = 5),2),
-  ((SELECT historical_id FROM system_user WHERE id_system_user = 5),3),
-  ((SELECT historical_id FROM system_user WHERE id_system_user = 6),1),
-  ((SELECT historical_id FROM system_user WHERE id_system_user = 6),2)
+  ((SELECT historical_id FROM system_user WHERE id_system_user = 7),1),
+  ((SELECT historical_id FROM system_user WHERE id_system_user = 7),2),
+  ((SELECT historical_id FROM system_user WHERE id_system_user = 7),3)
 ON CONFLICT DO NOTHING;
 
 --- Usuarios de servicio
@@ -1217,7 +1199,7 @@ VALUES
     'Chihuahua',
     'Chihuahua',
     '94386',
-    'psanchez@sisu.mx',
+    'psanchez@banorte.com',
     true
   ), --NIP "1234"
   (
@@ -1233,7 +1215,7 @@ VALUES
     'Chihuahua',
     'Chihuahua',
     '91000',
-    'rrodriguez@sisu.mx',
+    'rrodriguez@banorte.com',
     true
   ), --NIP "1234"
   (
@@ -1249,7 +1231,7 @@ VALUES
     'Chihuahua',
     'Chihuahua',
     '67382',
-    'cviramontes@sisu.mx',
+    'cviramontes@banorte.com',
     true
   ), --NIP "1234"
   (
@@ -1265,7 +1247,7 @@ VALUES
     'Chihuahua',
     'Chihuahua',
     '63728',
-    'pviramontes@sisu.mx',
+    'pviramontes@banorte.com',
     true
   ), --NIP "1234"
   (
@@ -1281,7 +1263,7 @@ VALUES
     'Chihuahua',
     'Chihuahua',
     '57438',
-    'jcasas@sisu.mx',
+    'jcasas@banorte.com',
     true
   ) --NIP "1234"
   ON CONFLICT DO NOTHING;
@@ -1299,7 +1281,7 @@ INSERT INTO service_user_responses (
     (7,1,'Amarillo'),( 8,1,'Conchita'),(9,1,'Soltero'),(11,1,'Sí'),
   (1,2,'Soriana'),(2,2,'13/5/1980'),(3,2,'Queretaro'),(4,2,'Quintana Roo'),(5,2,'María'),( 6,2,'Víctor Rosales'),
     (7,2,'Rojo'),(8,2,'Firulais'),(9,2,'Casado'),(14,2,'3'),
-  (1,3,'SISU'),(2,3,'30/9/2000'),(3,3,'Sonora'),(4,3,'Baja california'),(5,3,'Carolina'),(6,3,'González Ortega'),
+  (1,3,'microsafe'),(2,3,'30/9/2000'),(3,3,'Sonora'),(4,3,'Baja california'),(5,3,'Carolina'),(6,3,'González Ortega'),
     (7,3,'Verde'),(8,3,'Nube'),(9,3,'Soltero'),(11,3,'No'),
   (1,4,'Sams'),(2,4,'3/4/1970'),(3,4,'Oaxaca'),(4,4,'Michoacán'),(5,4,'Regina'),(6,4,'Olimpiada'),
     (7,4,'Negro'),(8,4,'Peluches'),(9,4,'Divorciado'),(14,4,'1'),
@@ -10304,6 +10286,45 @@ $FUNCTION$
       WHERE
           s.historical_id = system_user_historical_id AND is_deleted = false
             AND s.id_system_user != next_system_user_id;
+  END;
+$FUNCTION$;
+
+-- operation_questions report
+CREATE OR REPLACE FUNCTION get_all_randomic_operation_questions()
+ RETURNS TABLE(
+ 	randomic_operation_questions_id INTEGER,
+	id_randomic_operation INTEGER, 
+	completename TEXT,
+	question CHARACTER VARYING(80),
+	nresponsecorrect CHARACTER VARYING(80),
+	responseuser CHARACTER VARYING(64)
+ )
+ LANGUAGE plpgsql
+ STABLE
+AS 
+$FUNCTION$
+  BEGIN
+    PERFORM check_token_validity();
+    RETURN QUERY SELECT * FROM(
+SELECT DISTINCT
+	a.randomic_operation_questions_id, 
+	a.id_randomic_operation, 
+	p."name" || ' ' || p.last_name || ' ' || p.mothers_last_name completename,
+	c.question,
+	CASE 
+		WHEN c.id_question = k.id_question
+		THEN k.response
+	ELSE ''
+	END responseCorrect,
+	a.response responseUser
+	FROM randomic_operation_questions a
+	INNER JOIN questions c ON a.id_question = c.id_question
+	INNER JOIN randomic_operation t on a.id_randomic_operation = t.id_randomic_operation
+	INNER JOIN service_user p ON t.service_user_historical_id = p.historical_id
+	INNER JOIN service_user_responses k ON p.id_service_user = k.id_service_user
+	) AS TempTable
+	where responsecorrect != ''
+	order by randomic_operation_questions_id desc;
   END;
 $FUNCTION$;
 

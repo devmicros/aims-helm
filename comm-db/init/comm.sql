@@ -1,8 +1,4 @@
-
-SELECT 'CREATE DATABASE aimsdata' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'aimsdata')\gexec
---CREATE DATABASE aimsdata;
-\c aimsdata
-
+ALTER DATABASE aimsdata SET timezone TO 'UTC';
 -- -----------------------------------
 -- Tablas de encolamiento de mensajes
 -- -----------------------------------
